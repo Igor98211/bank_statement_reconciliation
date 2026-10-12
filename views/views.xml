@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="bank_integration_transaction_view_list" model="ir.ui.view">
+        <field name="name">bank.integration.transaction.list</field>
+        <field name="model">bank.integration.transaction</field>
+        <field name="arch" type="xml">
+            <list string="Bank Transactions">
+                <header>
+                    <button name="action_import_bank_transactions" type="object"
+                        string="Import Bank Transactions" display="always" class="btn-primary"/>
+                    <button name="action_auto_match" type="object"
+                        string="Auto Match" display="always"/>
+                </header>
+                <field name="transaction_date"/>
+                <field name="amount"/>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <field name="invoice_id"/>
+                <field name="state" widget="badge"
+                    decoration-info="state == 'new'"
+                    decoration-success="state == 'matched'"
+                    decoration-muted="state == 'ignored'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="bank_integration_transaction_view_form" model="ir.ui.view">
+        <field name="name">bank.integration.transaction.form</field>
+        <field name="model">bank.integration.transaction</field>
+        <field name="arch" type="xml">
+            <form string="Bank Transaction">
+                <header>
+                    <button name="action_match" type="object" string="Match"
+                        class="btn-primary" invisible="state != 'new'"/>
+                    <button name="action_ignore" type="object" string="Ignore"
+                        invisible="state != 'new'"/>
+                    <field name="state" widget="statusbar"
+                        statusbar_visible="new,matched,ignored"
+                        options="{'clickable': false}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="transaction_date"/>
+                            <field name="amount"/>
+                            <field name="reference"/>
+                        </group>
+                        <group>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="invoice_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="bank_integration_transaction_view_search" model="ir.ui.view">
+        <field name="name">bank.integration.transaction.search</field>
+        <field name="model">bank.integration.transaction</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="reference"/>
+                <field name="partner_id"/>
+                <field name="invoice_id"/>
+                <filter name="filter_new" string="New" domain="[('state', '=', 'new')]"/>
+                <filter name="filter_matched" string="Matched" domain="[('state', '=', 'matched')]"/>
+                <filter name="filter_ignored" string="Ignored" domain="[('state', '=', 'ignored')]"/>
+                <separator/>
+                <filter name="filter_date" string="Date" date="transaction_date"/>
+                <group>
+                    <filter name="group_date" string="Date" context="{'group_by': 'transaction_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_bank_integration_transaction" model="ir.actions.act_window">
+        <field name="name">Bank Transactions</field>
+        <field name="res_model">bank.integration.transaction</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Import bank transactions and match them with customer invoices
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="menu_bank_integration_transaction"
+        name="Bank Transactions"
+        parent="account.menu_finance_receivables"
+        action="action_bank_integration_transaction"
+        sequence="20"
+        groups="account.group_account_invoice"/>
+</odoo>
